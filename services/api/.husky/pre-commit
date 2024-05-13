@@ -1,2 +1,4 @@
 cd services/api
 npm run format-and-lint
+
+exit 1
