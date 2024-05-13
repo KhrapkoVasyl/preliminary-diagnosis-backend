@@ -1,4 +1,2 @@
-cd server
+cd services/api
 npm run format-and-lint:fix
-
-exit 1
