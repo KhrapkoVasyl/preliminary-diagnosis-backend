@@ -1,2 +1,4 @@
 cd server
 npm run format-and-lint:fix
+
+exit 1
