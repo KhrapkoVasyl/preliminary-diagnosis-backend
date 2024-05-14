@@ -34,9 +34,28 @@ services:
       retries: 5
       start_period: 1m
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    ports:
+      - '9000:9000'
+      - '9001:9001' # port for monitoring web-interface
+    networks:
+      - network
+    environment:
+      MINIO_ACCESS_KEY: access-key
+      MINIO_SECRET_KEY: secret-key
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
 networks:
   network:
     driver: bridge
 
 volumes:
   postgres_data:
+  minio_data:
