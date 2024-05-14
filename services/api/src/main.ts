@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -7,17 +6,18 @@ import {
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { validationPipe } from './common/pipes';
+import { AppConfigService } from './config/app-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
-  const configService = app.get<ConfigService>(ConfigService);
+  const configService = app.get<AppConfigService>(AppConfigService);
 
-  const HOST = configService.get('NEST_HOST');
-  const PORT = configService.get('NEST_PORT');
-  const GLOBAL_PREFIX = configService.get('GLOBAL_PREFIX');
+  const HOST = configService.get<string>('NEST_HOST');
+  const PORT = configService.get<number | string>('NEST_PORT');
+  const GLOBAL_PREFIX = configService.get<string>('GLOBAL_PREFIX');
 
   app.setGlobalPrefix(GLOBAL_PREFIX);
 
@@ -30,7 +30,7 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
-    const SWAGGER_DOCS_PATH = configService.get('SWAGGER_DOCS_PATH');
+    const SWAGGER_DOCS_PATH = configService.get<string>('SWAGGER_DOCS_PATH');
     SwaggerModule.setup(SWAGGER_DOCS_PATH, app, document);
   }
 
