@@ -44,10 +44,8 @@ services:
     networks:
       - network
     environment:
-      MINIO_ACCESS_KEY: access-key
-      MINIO_SECRET_KEY: secret-key
-      MINIO_ROOT_USER: user
-      MINIO_ROOT_PASSWORD: password
+      MINIO_ROOT_USER: access-key
+      MINIO_ROOT_PASSWORD: secret-key
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data

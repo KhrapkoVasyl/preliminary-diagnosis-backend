@@ -5,6 +5,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import multipart from '@fastify/multipart';
 import { validationPipe } from './common/pipes';
 import { AppConfigService } from './config/app-config.service';
 
@@ -14,6 +15,13 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   const configService = app.get<AppConfigService>(AppConfigService);
+
+  await app.register(multipart, {
+    addToBody: true,
+    limits: {
+      fileSize: configService.get<number>('FILE_SIZE_LIMIT'),
+    },
+  });
 
   const HOST = configService.get<string>('NEST_HOST');
   const PORT = configService.get<number | string>('NEST_PORT');
