@@ -11,7 +11,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { SexAtBirthEnum } from '../enums';
+import { SexAtBirthEnum, UserRoleEnum } from '../enums';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -39,6 +39,15 @@ export class CreateUserDto {
     maxLength: 256,
   })
   public readonly password: string;
+
+  @IsOptional()
+  @IsEnum(UserRoleEnum)
+  @ApiProperty({
+    enum: UserRoleEnum,
+    examples: UserRoleEnum,
+    nullable: true,
+  })
+  public readonly role?: UserRoleEnum;
 
   @IsNotEmpty()
   @IsString()
