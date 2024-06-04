@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Patch,
   Post,
   UseGuards,
   UseInterceptors,
@@ -15,6 +16,7 @@ import { AuthTokens, JwtPayloadUser, RefreshJwtPayload } from './types';
 import { UserEntity } from '../users/user.entity';
 import { Role, User } from './decorators';
 import { UserRoleEnum } from '../users/enums';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -49,6 +51,16 @@ export class AuthController {
   @Get('profile')
   getProfile(@User() user: JwtPayloadUser): Promise<UserEntity> {
     return this.authService.findUser({ id: user.id });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Patch('profile')
+  updateProfile(
+    @User() user: JwtPayloadUser,
+    @Body() data: UpdateProfileDto,
+  ): Promise<UserEntity> {
+    return this.authService.updateUser({ id: user.id }, data);
   }
 
   @ApiBearerAuth()

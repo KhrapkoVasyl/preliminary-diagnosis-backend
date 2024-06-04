@@ -142,6 +142,13 @@ export class AuthService {
     return this.usersService.findOne(conditions);
   }
 
+  async updateUser(
+    conditions: FindOptionsWhere<UserEntity>,
+    data: Partial<UserEntity>,
+  ): Promise<UserEntity> {
+    return this.usersService.updateOne(conditions, data);
+  }
+
   generateTemporaryPassword(length = 6): string {
     return generateRandomString(length);
   }
