@@ -16,6 +16,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { SingInDto } from './dto';
 import { RefreshTokenEntity } from '../refresh-tokens/refresh-token.entity';
 import { ErrorMessagesEnum } from 'src/common/enums';
+import { generateRandomString } from 'src/helpers';
+import { UserRoleEnum } from '../users/enums';
 
 @Injectable()
 export class AuthService {
@@ -138,5 +140,22 @@ export class AuthService {
     conditions: FindOptionsWhere<UserEntity>,
   ): Promise<UserEntity> {
     return this.usersService.findOne(conditions);
+  }
+
+  generateTemporaryPassword(length = 6): string {
+    return generateRandomString(length);
+  }
+
+  async createPatient(
+    data: Partial<UserEntity>,
+  ): Promise<{ user: UserEntity; password: string }> {
+    const password = this.generateTemporaryPassword();
+    const user = await this.usersService.createOne({
+      ...data,
+      role: UserRoleEnum.PATIENT,
+      password,
+    });
+
+    return { user, password };
   }
 }

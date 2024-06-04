@@ -8,12 +8,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RefreshTokenDto, SingInDto } from './dto';
+import { CreatePatientDto, RefreshTokenDto, SingInDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard, RefreshTokenGuard } from 'src/modules/auth/guards';
 import { AuthTokens, JwtPayloadUser, RefreshJwtPayload } from './types';
 import { UserEntity } from '../users/user.entity';
-import { User } from './decorators';
+import { Role, User } from './decorators';
+import { UserRoleEnum } from '../users/enums';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -48,5 +49,15 @@ export class AuthController {
   @Get('profile')
   getProfile(@User() user: JwtPayloadUser): Promise<UserEntity> {
     return this.authService.findUser({ id: user.id });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Role(UserRoleEnum.ADMIN)
+  @Post('patients')
+  createPatient(
+    @Body() data: CreatePatientDto,
+  ): Promise<{ user: UserEntity; password: string }> {
+    return this.authService.createPatient(data);
   }
 }
