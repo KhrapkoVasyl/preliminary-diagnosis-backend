@@ -17,9 +17,9 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate({ id, role }: AccessJwtPayload) {
+  async validate({ id, role, refreshTokenId }: AccessJwtPayload) {
     return this.usersService.findOne(
-      { id, role },
+      { id, role, refreshTokens: { id: refreshTokenId } },
       {
         loadEagerRelations: false,
       },

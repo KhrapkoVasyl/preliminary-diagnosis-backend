@@ -22,8 +22,9 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
     info: Error,
     ctx: ExecutionContext,
   ): UserEntity | any {
-    if (info && !user)
+    if (_err || info || !user) {
       throw new UnauthorizedException(ErrorMessagesEnum.UNAUTHORIZED);
+    }
 
     const allowedRoles = this.reflector.get<UserRoleEnum[]>(
       'roles',

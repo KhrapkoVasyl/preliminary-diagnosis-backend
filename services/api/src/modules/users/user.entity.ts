@@ -1,10 +1,11 @@
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
-import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { CommonEntity } from 'src/common/entities';
 import * as bcrypt from 'bcrypt';
 import { PASSWORD_SALT_ROUNDS } from 'src/common/constants';
 import { SexAtBirthEnum, UserRoleEnum } from './enums';
+import { RefreshTokenEntity } from '../refresh-tokens/refresh-token.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends CommonEntity {
@@ -43,6 +44,10 @@ export class UserEntity extends CommonEntity {
     nullable: true,
   })
   public readonly sexAtBirth: SexAtBirthEnum;
+
+  @ApiHideProperty()
+  @OneToMany(() => RefreshTokenEntity, ({ user }) => user)
+  public readonly refreshTokens: RefreshTokenEntity[];
 
   @BeforeInsert()
   @BeforeUpdate()

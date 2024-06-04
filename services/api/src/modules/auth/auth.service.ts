@@ -96,6 +96,7 @@ export class AuthService {
     const accessTokenPayload: AccessJwtPayload = {
       id: user.id,
       role: user.role,
+      refreshTokenId,
     };
 
     const refreshTokenPayload: RefreshJwtPayload = {
