@@ -7,7 +7,6 @@ import { CreateUserDto } from '../users/dto';
 import { UsersService } from '../users/users.service';
 import { RefreshTokensService } from '../refresh-tokens/refresh-tokens.service';
 import * as bcrypt from 'bcrypt';
-import { authServiceErrorMessages } from './auth.constants';
 import { AuthTokens, AccessJwtPayload, RefreshJwtPayload } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { AppConfigService } from 'src/config/app-config.service';
@@ -16,31 +15,27 @@ import { FindOptionsWhere } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { SingInDto } from './dto';
 import { RefreshTokenEntity } from '../refresh-tokens/refresh-token.entity';
+import { ErrorMessagesEnum } from 'src/common/enums';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtAccessSecret: string;
-  private readonly jwtAccessExpiresIn: string;
-  private readonly jwtRefreshSecret: string;
-  private readonly jwtRefreshExpiresIn: string;
+  private readonly jwtAccessSecret =
+    this.appConfigService.get<string>('JWT_ACCESS_SECRET');
+  private readonly jwtAccessExpiry = this.appConfigService.get<string>(
+    'JWT_ACCESS_EXPIRATION_TIME',
+  );
+  private readonly jwtRefreshSecret =
+    this.appConfigService.get<string>('JWT_REFRESH_SECRET');
+  private readonly jwtRefreshExpiry = this.appConfigService.get<string>(
+    'JWT_REFRESH_EXPIRATION_TIME',
+  );
 
   constructor(
-    private readonly usersService: UsersService,
-    private readonly refreshTokensService: RefreshTokensService,
-    private readonly jwtService: JwtService,
     private readonly appConfigService: AppConfigService,
-  ) {
-    this.jwtAccessSecret =
-      this.appConfigService.get<string>('JWT_ACCESS_SECRET');
-    this.jwtAccessExpiresIn = this.appConfigService.get<string>(
-      'JWT_ACCESS_EXPIRES_IN',
-    );
-    this.jwtRefreshSecret =
-      this.appConfigService.get<string>('JWT_REFRESH_SECRET');
-    this.jwtRefreshExpiresIn = this.appConfigService.get<string>(
-      'JWT_REFRESH_EXPIRES_IN',
-    );
-  }
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly refreshTokensService: RefreshTokensService,
+  ) {}
 
   async signUp(createUserDto: CreateUserDto): Promise<AuthTokens> {
     const userExists = await this.usersService
@@ -48,30 +43,29 @@ export class AuthService {
       .catch(() => null);
 
     if (userExists) {
-      throw new ConflictException(authServiceErrorMessages.entityAlreadyExists);
+      throw new ConflictException(ErrorMessagesEnum.USER_ALREADY_EXIST);
     }
 
     const user = await this.usersService.createOne(createUserDto);
-
-    const tokens = await this.createUserTokens(user);
-
-    return tokens;
+    return this.createUserTokens(user);
   }
 
   async signIn(data: SingInDto): Promise<AuthTokens> {
     const user = await this.usersService
       .findOne({ email: data.email })
       .catch(() => {
-        throw new UnauthorizedException(authServiceErrorMessages.unauthorized);
+        throw new UnauthorizedException(ErrorMessagesEnum.INVALID_CREDENTIALS);
       });
 
-    const passwordMatches = await bcrypt.compare(data.password, user.password);
-    if (!passwordMatches)
-      throw new UnauthorizedException(authServiceErrorMessages.unauthorized);
+    const correctPassword = await bcrypt.compare(data.password, user.password);
+
+    if (!correctPassword) {
+      throw new UnauthorizedException(ErrorMessagesEnum.INVALID_CREDENTIALS);
+    }
 
     const tokens = await this.createUserTokens(user);
 
-    await this.refreshTokensService.deleteExceededRefreshTokens({
+    await this.refreshTokensService.deleteExpiredTokens({
       user: { id: user.id },
     });
 
@@ -101,7 +95,6 @@ export class AuthService {
   ): Promise<AuthTokens> {
     const accessTokenPayload: AccessJwtPayload = {
       id: user.id,
-      name: user.name,
       role: user.role,
     };
 
@@ -113,11 +106,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(accessTokenPayload, {
         secret: this.jwtAccessSecret,
-        expiresIn: this.jwtAccessExpiresIn,
+        expiresIn: this.jwtAccessExpiry,
       }),
       this.jwtService.signAsync(refreshTokenPayload, {
         secret: this.jwtRefreshSecret,
-        expiresIn: this.jwtRefreshExpiresIn,
+        expiresIn: this.jwtRefreshExpiry,
       }),
     ]);
 
@@ -132,7 +125,7 @@ export class AuthService {
   async createUserTokens(user: UserEntity): Promise<AuthTokens> {
     const refreshTokenId = uuidv4();
     const tokens = await this.generateTokens(user, refreshTokenId);
-    await this.refreshTokensService.createRefreshToken(
+    await this.refreshTokensService.createToken(
       { id: user.id },
       { value: tokens.refreshToken, id: refreshTokenId },
     );
