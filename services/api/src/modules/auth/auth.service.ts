@@ -92,7 +92,7 @@ export class AuthService {
   }
 
   async generateTokens(
-    user: UserEntity,
+    user: Partial<UserEntity>,
     refreshTokenId: string,
   ): Promise<AuthTokens> {
     const accessTokenPayload: AccessJwtPayload = {
@@ -125,7 +125,7 @@ export class AuthService {
     return tokens;
   }
 
-  async createUserTokens(user: UserEntity): Promise<AuthTokens> {
+  async createUserTokens(user: Partial<UserEntity>): Promise<AuthTokens> {
     const refreshTokenId = uuidv4();
     const tokens = await this.generateTokens(user, refreshTokenId);
     await this.refreshTokensService.createToken(
@@ -147,6 +147,16 @@ export class AuthService {
     data: Partial<UserEntity>,
   ): Promise<UserEntity> {
     return this.usersService.updateOne(conditions, data);
+  }
+
+  async updatePassword(
+    conditions: FindOptionsWhere<UserEntity>,
+    password: string,
+  ): Promise<AuthTokens> {
+    const updatedUser = await this.usersService.updateOne(conditions, {
+      password,
+    });
+    return this.createUserTokens(updatedUser);
   }
 
   generateTemporaryPassword(length = 6): string {

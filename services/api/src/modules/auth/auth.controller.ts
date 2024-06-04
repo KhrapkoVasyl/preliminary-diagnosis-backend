@@ -9,7 +9,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreatePatientDto, RefreshTokenDto, SingInDto } from './dto';
+import {
+  CreatePatientDto,
+  RefreshTokenDto,
+  SingInDto,
+  UpdatePasswordDto,
+} from './dto';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard, RefreshTokenGuard } from 'src/modules/auth/guards';
 import { AuthTokens, JwtPayloadUser, RefreshJwtPayload } from './types';
@@ -61,6 +66,16 @@ export class AuthController {
     @Body() data: UpdateProfileDto,
   ): Promise<UserEntity> {
     return this.authService.updateUser({ id: user.id }, data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Patch('password')
+  updatePassword(
+    @User() user: JwtPayloadUser,
+    @Body() data: UpdatePasswordDto,
+  ): Promise<AuthTokens> {
+    return this.authService.updatePassword({ id: user.id }, data.password);
   }
 
   @ApiBearerAuth()
