@@ -13,7 +13,7 @@ import {
 import { StudyTypesService } from './study-types.service';
 import { StudyTypeEntity } from './study-type.entity';
 import { IdDto } from 'src/common/dto';
-import { CreateGenreDto, UpdateGenreDto } from './dto';
+import { CreateStudyTypeDto, UpdateStudyTypeDto } from './dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { AccessTokenGuard } from '../auth/guards';
@@ -40,7 +40,9 @@ export class StudyTypesController {
 
   @Role(UserRoleEnum.ADMIN)
   @Post()
-  createOne(@Body() createEntityDto: CreateGenreDto): Promise<StudyTypeEntity> {
+  createOne(
+    @Body() createEntityDto: CreateStudyTypeDto,
+  ): Promise<StudyTypeEntity> {
     const model = plainToInstance(StudyTypeEntity, createEntityDto);
 
     return this.studyTypesService.createOne(model);
@@ -50,7 +52,7 @@ export class StudyTypesController {
   @Patch(':id')
   updateOne(
     @Param() conditions: IdDto,
-    @Body() updateEntityDto: UpdateGenreDto,
+    @Body() updateEntityDto: UpdateStudyTypeDto,
   ): Promise<StudyTypeEntity> {
     const model = plainToInstance(StudyTypeEntity, updateEntityDto);
 
