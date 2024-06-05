@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
 import { DiagnosticModelEntity } from '../diagnostic-models/diagnostic-model.entity';
+import { FileEntity } from '../files/file.entity';
 
 @Entity({ name: 'diagnostic-model-versions' })
 export class DiagnosticModelVersionEntity extends CommonEntity {
@@ -21,6 +22,19 @@ export class DiagnosticModelVersionEntity extends CommonEntity {
   @ApiProperty({ type: 'integer', required: true, example: 1 })
   @Column({ type: 'integer', nullable: false })
   public version: number;
+
+  @JoinColumn()
+  @ApiProperty({
+    type: () => FileEntity,
+    required: true,
+    nullable: false,
+  })
+  @OneToOne(() => FileEntity, {
+    onDelete: 'CASCADE',
+    nullable: false,
+    eager: true,
+  })
+  public readonly file: Partial<FileEntity>;
 
   @JoinColumn()
   @ApiProperty({
