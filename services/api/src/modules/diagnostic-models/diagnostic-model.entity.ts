@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
-import { StudyTypeEntity } from '../study-types/study-type.entity';
+import { DiagnosticTypeEntity } from '../diagnostic-types/diagnostic-type.entity';
 
 @Entity({ name: 'diagnostic-models' })
 export class DiagnosticModelEntity extends CommonEntity {
@@ -19,11 +19,15 @@ export class DiagnosticModelEntity extends CommonEntity {
   description: string;
 
   @JoinColumn()
-  @ApiProperty({ type: () => StudyTypeEntity, nullable: false, required: true })
-  @ManyToOne(() => StudyTypeEntity, {
+  @ApiProperty({
+    type: () => DiagnosticTypeEntity,
+    nullable: false,
+    required: true,
+  })
+  @ManyToOne(() => DiagnosticTypeEntity, {
     onDelete: 'CASCADE',
     eager: false,
     nullable: false,
   })
-  type: Partial<StudyTypeEntity>;
+  type: Partial<DiagnosticTypeEntity>;
 }

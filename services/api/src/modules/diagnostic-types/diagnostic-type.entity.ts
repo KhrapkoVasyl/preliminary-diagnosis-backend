@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Entity, Column } from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
 
-@Entity({ name: 'study-types' })
-export class StudyTypeEntity extends CommonEntity {
+@Entity({ name: 'diagnostic-types' })
+export class DiagnosticTypeEntity extends CommonEntity {
   @ApiProperty({ type: 'string', maxLength: 128 })
   @Column({ length: 128, nullable: false })
   name: string;
@@ -18,8 +18,8 @@ export class StudyTypeEntity extends CommonEntity {
   description: string;
 
   // @ApiHideProperty()
-  // @OneToMany(() => StudyEntity, ({ type }) => type, {
+  // @OneToMany(() => DiagnosticEntity, ({ type }) => type, {
   //   nullable: true,
   // })
-  // studies: StudyEntity[];
+  // studies: DiagnosticEntity[];
 }

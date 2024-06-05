@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateStudyTypeDto {
+export class CreateDiagnosticTypeDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(128)

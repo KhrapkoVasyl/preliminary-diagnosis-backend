@@ -4,7 +4,7 @@ import { DatabaseModule } from './systems/database';
 import { FilesModule } from './modules/files';
 import { UsersModule } from './modules/users';
 import { AuthModule } from './modules/auth/auth.module';
-import { StudyTypesModule } from './modules/study-types';
+import { DiagnosticTypesModule } from './modules/diagnostic-types';
 import { DiagnosticModelsModule } from './modules/diagnostic-models';
 
 @Module({
@@ -13,7 +13,7 @@ import { DiagnosticModelsModule } from './modules/diagnostic-models';
     DatabaseModule,
     AuthModule,
     UsersModule,
-    StudyTypesModule,
+    DiagnosticTypesModule,
     DiagnosticModelsModule,
     FilesModule,
   ],
