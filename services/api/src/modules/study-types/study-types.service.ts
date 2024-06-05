@@ -9,8 +9,8 @@ import { StudyTypeEntity } from './study-type.entity';
 export class StudyTypesService extends BaseService<StudyTypeEntity> {
   constructor(
     @InjectRepository(StudyTypeEntity)
-    private readonly genreEntityRepository: Repository<StudyTypeEntity>,
+    private readonly studyTypeEntityRepository: Repository<StudyTypeEntity>,
   ) {
-    super(genreEntityRepository, studyTypesServiceErrorMessages);
+    super(studyTypeEntityRepository, studyTypesServiceErrorMessages);
   }
 }
