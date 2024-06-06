@@ -39,6 +39,7 @@ export class DiagnosticModelsController {
     private readonly diagnosticModelsService: DiagnosticModelsService,
   ) {}
 
+  @Role(UserRoleEnum.ADMIN)
   @Get()
   findAll(): Promise<DiagnosticModelEntity[]> {
     return this.diagnosticModelsService.findAllWithVersions();
@@ -49,6 +50,7 @@ export class DiagnosticModelsController {
     return this.diagnosticModelsService.selectAvailableModels();
   }
 
+  @Role(UserRoleEnum.ADMIN)
   @Get(':id')
   findOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
     return this.diagnosticModelsService.findOneWithVersions(conditions);
