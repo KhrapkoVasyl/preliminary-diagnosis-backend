@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
-  IsString,
-  MaxLength,
-  ValidateNested,
-} from 'class-validator';
-import { IdDto } from 'src/common/dto';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { CreateFileDto } from 'src/modules/files/dto';
 
-export class CreateDiagnosticModelVersionDto {
+export class UploadModelVersionDto extends CreateFileDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(128)
@@ -31,10 +24,4 @@ export class CreateDiagnosticModelVersionDto {
     maxLength: 500,
   })
   public readonly description: string;
-
-  @IsNotEmpty()
-  @IsObject()
-  @ValidateNested()
-  @ApiProperty({ type: IdDto, required: true, nullable: false })
-  public readonly model: IdDto;
 }

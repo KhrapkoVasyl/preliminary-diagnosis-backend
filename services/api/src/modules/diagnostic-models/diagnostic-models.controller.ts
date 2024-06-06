@@ -13,8 +13,8 @@ import {
 import { DiagnosticModelsService } from './diagnostic-models.service';
 import { DiagnosticModelEntity } from './diagnostic-model.entity';
 import { IdDto } from 'src/common/dto';
-import { CreateGenreDto, UpdateGenreDto } from './dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CreateGenreDto, UpdateGenreDto, UploadModelVersionDto } from './dto';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { AccessTokenGuard } from '../auth/guards';
 import { Role } from '../auth/decorators';
@@ -37,7 +37,7 @@ export class DiagnosticModelsController {
 
   @Get(':id')
   findOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
-    return this.diagnosticModelsService.findOne(conditions);
+    return this.diagnosticModelsService.findOneWithVersions(conditions);
   }
 
   @Role(UserRoleEnum.ADMIN)
@@ -65,5 +65,22 @@ export class DiagnosticModelsController {
   @Delete(':id')
   deleteOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
     return this.diagnosticModelsService.deleteOne(conditions);
+  }
+
+  @Role(UserRoleEnum.ADMIN)
+  @Post(':id/versions')
+  @ApiBody({ type: UploadModelVersionDto })
+  @ApiConsumes('multipart/form-data')
+  uploadModelVersion(
+    @Param() conditions: IdDto,
+    @Body() data: UploadModelVersionDto,
+  ): Promise<DiagnosticModelEntity> {
+    const { file, ...versionData } = data;
+
+    return this.diagnosticModelsService.uploadModelVersion(
+      conditions,
+      file,
+      versionData,
+    );
   }
 }

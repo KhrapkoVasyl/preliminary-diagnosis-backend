@@ -3,6 +3,7 @@ import { Entity, Column, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
 import { DiagnosticModelEntity } from '../diagnostic-models/diagnostic-model.entity';
 import { FileEntity } from '../files/file.entity';
+import { DiagnosticModelVersionStatus } from './enums';
 
 @Entity({ name: 'diagnostic-model-versions' })
 export class DiagnosticModelVersionEntity extends CommonEntity {
@@ -35,6 +36,17 @@ export class DiagnosticModelVersionEntity extends CommonEntity {
     eager: true,
   })
   public readonly file: Partial<FileEntity>;
+
+  @ApiProperty({
+    enum: DiagnosticModelVersionStatus,
+    default: DiagnosticModelVersionStatus.ENABLED,
+  })
+  @Column({
+    type: 'enum',
+    enum: DiagnosticModelVersionStatus,
+    default: DiagnosticModelVersionStatus.ENABLED,
+  })
+  public readonly status: DiagnosticModelVersionStatus;
 
   @JoinColumn()
   @ApiProperty({
