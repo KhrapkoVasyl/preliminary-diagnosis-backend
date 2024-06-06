@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services';
 import {
   EntityManager,
+  FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
   Repository,
@@ -37,6 +38,21 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
   ): Promise<DiagnosticModelEntity> {
     return this.findOne(
       conditions,
+      {
+        ...options,
+        loadEagerRelations: false,
+        relations: { versions: { file: true } },
+        order: { versions: { version: 'DESC' } },
+      },
+      transactionManager,
+    );
+  }
+
+  async findAllWithVersions(
+    options?: FindManyOptions<DiagnosticModelEntity>,
+    transactionManager?: EntityManager,
+  ): Promise<DiagnosticModelEntity[]> {
+    return this.findAll(
       {
         ...options,
         loadEagerRelations: false,

@@ -40,7 +40,7 @@ export class DiagnosticModelsController {
 
   @Get()
   findAll(): Promise<DiagnosticModelEntity[]> {
-    return this.diagnosticModelsService.findAll();
+    return this.diagnosticModelsService.findAllWithVersions();
   }
 
   @Get(':id')
@@ -93,7 +93,7 @@ export class DiagnosticModelsController {
   }
 
   @Role(UserRoleEnum.ADMIN)
-  @Post('versions/:id')
+  @Patch('versions/:id')
   @ApiParam({ name: 'id', description: 'Version id' })
   updateVersionStatus(
     @Param() conditions: IdDto,
