@@ -41,15 +41,10 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
         ...options,
         loadEagerRelations: false,
         relations: { versions: { file: true } },
+        order: { versions: { version: 'DESC' } },
       },
       transactionManager,
-    ).then((data) => {
-      if (data?.versions) {
-        data.versions.sort((a, b) => b.version - a.version);
-      }
-
-      return data;
-    });
+    );
   }
 
   async uploadModelVersion(
