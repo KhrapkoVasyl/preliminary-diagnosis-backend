@@ -16,6 +16,8 @@ import { FilesService } from '../files/files.service';
 import { join } from 'node:path';
 import { MODELS_DIRECTORY } from 'src/systems/storage/storage.constants';
 import { DiagnosticModelVersionsService } from '../diagnostic-model-versions/diagnostic-model-versions.service';
+import { DiagnosticModelStatus } from './enums';
+import { DiagnosticModelVersionStatus } from '../diagnostic-model-versions/enums';
 
 @Injectable()
 export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> {
@@ -61,6 +63,36 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
       },
       transactionManager,
     );
+  }
+
+  async selectAvailableModels(
+    options?: FindManyOptions<DiagnosticModelEntity>,
+  ): Promise<DiagnosticModelEntity[]> {
+    const models = await this.findAll({
+      ...options,
+      where: {
+        status: DiagnosticModelStatus.ENABLED,
+        versions: {
+          status: DiagnosticModelVersionStatus.ENABLED,
+        },
+      },
+      relations: { versions: { file: true } },
+      order: {
+        versions: {
+          version: 'DESC',
+        },
+      },
+    });
+
+    const filteredModels = models.filter((model) => {
+      if (model.versions && model.versions.length > 0) {
+        model.versions = [model.versions[0]];
+        return true;
+      }
+      return false;
+    });
+
+    return filteredModels;
   }
 
   async uploadModelVersion(

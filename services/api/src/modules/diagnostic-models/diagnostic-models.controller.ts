@@ -44,6 +44,11 @@ export class DiagnosticModelsController {
     return this.diagnosticModelsService.findAllWithVersions();
   }
 
+  @Get('available')
+  selectAvailableModels(): Promise<DiagnosticModelEntity[]> {
+    return this.diagnosticModelsService.selectAvailableModels();
+  }
+
   @Get(':id')
   findOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
     return this.diagnosticModelsService.findOneWithVersions(conditions);
