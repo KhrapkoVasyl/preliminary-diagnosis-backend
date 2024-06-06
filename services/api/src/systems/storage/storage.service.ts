@@ -79,11 +79,11 @@ export class StorageService {
         mimetype,
       };
     } catch (error) {
-      await this.deleteOne(pathInStorage);
       this.logger.error(
         `MINIO UPLOAD ERROR | BUCKET: ${this.bucket}; PATH TO FILE: ${pathInStorage}. Result: FAILED`,
         error,
       );
+      await this.deleteOne(pathInStorage);
       throw new BadRequestException(ErrorMessagesEnum.FILE_UPLOAD_ERROR);
     }
   }
