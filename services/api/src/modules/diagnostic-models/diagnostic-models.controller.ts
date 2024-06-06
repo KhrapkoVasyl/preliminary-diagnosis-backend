@@ -14,11 +14,19 @@ import { DiagnosticModelsService } from './diagnostic-models.service';
 import { DiagnosticModelEntity } from './diagnostic-model.entity';
 import { IdDto } from 'src/common/dto';
 import { CreateGenreDto, UpdateGenreDto, UploadModelVersionDto } from './dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { AccessTokenGuard } from '../auth/guards';
 import { Role } from '../auth/decorators';
 import { UserRoleEnum } from '../users/enums';
+import { DiagnosticModelVersionEntity } from '../diagnostic-model-versions/diagnostic-model-version.entity';
+import { UpdateModelVersionStatusDto } from './dto/update-model-version-status.dto';
 
 @ApiTags('diagnostic-models')
 @Controller('diagnostic-models')
@@ -82,5 +90,15 @@ export class DiagnosticModelsController {
       file,
       versionData,
     );
+  }
+
+  @Role(UserRoleEnum.ADMIN)
+  @Post('versions/:id')
+  @ApiParam({ name: 'id', description: 'Version id' })
+  updateVersionStatus(
+    @Param() conditions: IdDto,
+    @Body() data: UpdateModelVersionStatusDto,
+  ): Promise<DiagnosticModelVersionEntity> {
+    return this.diagnosticModelsService.updateVersionStatus(conditions, data);
   }
 }

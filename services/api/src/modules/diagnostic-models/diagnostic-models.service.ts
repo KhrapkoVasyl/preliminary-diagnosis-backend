@@ -90,6 +90,16 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
     );
   }
 
+  async updateVersionStatus(
+    conditions: FindOptionsWhere<DiagnosticModelVersionEntity>,
+    versionData: Partial<DiagnosticModelVersionEntity>,
+  ): Promise<DiagnosticModelVersionEntity> {
+    return this.diagnosticModelVersionsService.updateOne(
+      conditions,
+      versionData,
+    );
+  }
+
   getPathToModelVersionFile(modelId: string): string {
     return join(MODELS_DIRECTORY, modelId);
   }
