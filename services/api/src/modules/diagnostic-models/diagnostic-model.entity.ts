@@ -3,6 +3,7 @@ import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
 import { DiagnosticTypeEntity } from '../diagnostic-types/diagnostic-type.entity';
 import { DiagnosticModelVersionEntity } from '../diagnostic-model-versions/diagnostic-model-version.entity';
+import { DiagnosticModelStatus } from './enums';
 
 @Entity({ name: 'diagnostic-models' })
 export class DiagnosticModelEntity extends CommonEntity {
@@ -31,6 +32,17 @@ export class DiagnosticModelEntity extends CommonEntity {
     nullable: false,
   })
   type: Partial<DiagnosticTypeEntity>;
+
+  @ApiProperty({
+    enum: DiagnosticModelStatus,
+    default: DiagnosticModelStatus.ENABLED,
+  })
+  @Column({
+    type: 'enum',
+    enum: DiagnosticModelStatus,
+    default: DiagnosticModelStatus.ENABLED,
+  })
+  public readonly status: DiagnosticModelStatus;
 
   @ApiHideProperty()
   @OneToMany(() => DiagnosticModelVersionEntity, ({ model }) => model, {

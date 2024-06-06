@@ -27,6 +27,7 @@ import { Role } from '../auth/decorators';
 import { UserRoleEnum } from '../users/enums';
 import { DiagnosticModelVersionEntity } from '../diagnostic-model-versions/diagnostic-model-version.entity';
 import { UpdateModelVersionStatusDto } from './dto/update-model-version-status.dto';
+import { UpdateModelStatusDto } from './dto/update-model-status.dto';
 
 @ApiTags('diagnostic-models')
 @Controller('diagnostic-models')
@@ -93,7 +94,17 @@ export class DiagnosticModelsController {
   }
 
   @Role(UserRoleEnum.ADMIN)
-  @Patch('versions/:id')
+  @Patch(':id/status')
+  @ApiParam({ name: 'id', description: 'Model id' })
+  updateModelStatus(
+    @Param() conditions: IdDto,
+    @Body() data: UpdateModelStatusDto,
+  ): Promise<DiagnosticModelEntity> {
+    return this.diagnosticModelsService.updateOne(conditions, data);
+  }
+
+  @Role(UserRoleEnum.ADMIN)
+  @Patch('versions/:id/status')
   @ApiParam({ name: 'id', description: 'Version id' })
   updateVersionStatus(
     @Param() conditions: IdDto,
