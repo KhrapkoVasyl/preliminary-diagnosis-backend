@@ -95,6 +95,23 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
     return filteredModels;
   }
 
+  async selectAvailableModelVersion(
+    conditions: FindOptionsWhere<DiagnosticModelEntity>,
+    options?: FindOneOptions<DiagnosticModelEntity>,
+  ): Promise<DiagnosticModelEntity> {
+    const model = await this.findOneWithVersions(
+      {
+        ...conditions,
+        status: DiagnosticModelStatus.ENABLED,
+        versions: { status: DiagnosticModelVersionStatus.ENABLED },
+      },
+      options,
+    );
+
+    model.versions = [model.versions[0]];
+    return model;
+  }
+
   async uploadModelVersion(
     conditions: FindOptionsWhere<DiagnosticModelEntity>,
     file: IMultipartFile,

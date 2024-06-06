@@ -50,6 +50,14 @@ export class DiagnosticModelsController {
     return this.diagnosticModelsService.selectAvailableModels();
   }
 
+  @Get(':id/available')
+  @ApiParam({ name: 'id', description: 'Model id' })
+  selectAvailableModelVersion(
+    @Param() conditions: IdDto,
+  ): Promise<DiagnosticModelEntity> {
+    return this.diagnosticModelsService.selectAvailableModelVersion(conditions);
+  }
+
   @Role(UserRoleEnum.ADMIN)
   @Get(':id')
   findOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
