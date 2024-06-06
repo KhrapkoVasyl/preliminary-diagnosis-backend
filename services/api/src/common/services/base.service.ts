@@ -4,6 +4,7 @@ import {
   FindOptionsWhere,
   FindOneOptions,
   Repository,
+  EntityManager,
 } from 'typeorm';
 import { CommonEntity } from '../entities';
 import { TServiceErrorMessages } from '../types';
@@ -16,8 +17,13 @@ export abstract class BaseService<T extends CommonEntity> {
 
   async findAll(
     options: FindManyOptions<T> = { loadEagerRelations: true },
+    transactionManager?: EntityManager,
   ): Promise<T[]> {
-    return this.entityRepository.find(options).catch(() => {
+    const repository = transactionManager
+      ? transactionManager.getRepository<T>(this.entityRepository.target)
+      : this.entityRepository;
+
+    return repository.find(options).catch(() => {
       throw new NotFoundException(this.serviceErrorMessages.entitiesNotFound);
     });
   }
@@ -25,8 +31,13 @@ export abstract class BaseService<T extends CommonEntity> {
   async findOne(
     conditions: FindOptionsWhere<T>,
     options: FindOneOptions<T> = { loadEagerRelations: true },
+    transactionManager?: EntityManager,
   ): Promise<T> {
-    return this.entityRepository
+    const repository = transactionManager
+      ? transactionManager.getRepository<T>(this.entityRepository.target)
+      : this.entityRepository;
+
+    return repository
       .findOneOrFail({
         ...options,
         where: conditions,
@@ -36,38 +47,68 @@ export abstract class BaseService<T extends CommonEntity> {
       });
   }
 
-  async createOne(entity: Partial<T>): Promise<T> {
-    const entityToCreate = this.entityRepository.create(entity as T);
-    const { id } = await this.entityRepository
-      .save(entityToCreate)
-      .catch(() => {
-        throw new BadRequestException(this.serviceErrorMessages.invalidData);
-      });
-    return this.findOne({ id } as FindOptionsWhere<T>);
+  async createOne(
+    entity: Partial<T>,
+    transactionManager?: EntityManager,
+  ): Promise<T> {
+    const repository = transactionManager
+      ? transactionManager.getRepository<T>(this.entityRepository.target)
+      : this.entityRepository;
+
+    const entityToCreate = repository.create(entity as T);
+    const { id } = await repository.save(entityToCreate).catch(() => {
+      throw new BadRequestException(this.serviceErrorMessages.invalidData);
+    });
+    return this.findOne(
+      { id } as FindOptionsWhere<T>,
+      { loadEagerRelations: true },
+      transactionManager,
+    );
   }
 
   async updateOne(
     conditions: FindOptionsWhere<T>,
     entity: Partial<T>,
+    transactionManager?: EntityManager,
   ): Promise<T> {
-    const entityToUpdate = await this.findOne(conditions);
-    const updatedEntity = this.entityRepository.merge(
-      entityToUpdate,
-      entity as T,
+    const repository = transactionManager
+      ? transactionManager.getRepository<T>(this.entityRepository.target)
+      : this.entityRepository;
+
+    const entityToUpdate = await this.findOne(
+      conditions,
+      { loadEagerRelations: false },
+      transactionManager,
     );
-    const { id } = await this.entityRepository.save(updatedEntity).catch(() => {
+    const updatedEntity = repository.merge(entityToUpdate, entity as T);
+    const { id } = await repository.save(updatedEntity).catch(() => {
       throw new BadRequestException(this.serviceErrorMessages.invalidData);
     });
 
-    return this.findOne({ id } as FindOptionsWhere<T>);
+    return this.findOne(
+      { id } as FindOptionsWhere<T>,
+      { loadEagerRelations: true },
+      transactionManager,
+    );
   }
 
-  async deleteOne(conditions: FindOptionsWhere<T>): Promise<T> {
-    const entity = await this.findOne(conditions, {
-      loadEagerRelations: false,
-    });
+  async deleteOne(
+    conditions: FindOptionsWhere<T>,
+    transactionManager?: EntityManager,
+  ): Promise<T> {
+    const repository = transactionManager
+      ? transactionManager.getRepository<T>(this.entityRepository.target)
+      : this.entityRepository;
 
-    return this.entityRepository.remove(entity).catch(() => {
+    const entity = await this.findOne(
+      conditions,
+      {
+        loadEagerRelations: false,
+      },
+      transactionManager,
+    );
+
+    return repository.remove(entity).catch(() => {
       throw new NotFoundException(this.serviceErrorMessages.entityNotFound);
     });
   }
