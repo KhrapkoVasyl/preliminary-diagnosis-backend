@@ -2,10 +2,8 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
   Post,
   UseGuards,
   UseInterceptors,
@@ -13,9 +11,8 @@ import {
 import { DiagnosticsService } from './diagnostics.service';
 import { DiagnosticEntity } from './diagnostic.entity';
 import { IdDto } from 'src/common/dto';
-import { CreateDiagnosticDto, UpdateDiagnosticDto } from './dto';
+import { CreateDiagnosticDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
 import { AccessTokenGuard } from '../auth/guards';
 import { Role, User } from '../auth/decorators';
 import { UserRoleEnum } from '../users/enums';
@@ -30,13 +27,22 @@ export class DiagnosticsController {
   constructor(private readonly diagnosticsService: DiagnosticsService) {}
 
   @Get()
-  findAll(): Promise<DiagnosticEntity[]> {
-    return this.diagnosticsService.findAll();
+  findAll(@User() user: Partial<UserEntity>): Promise<DiagnosticEntity[]> {
+    return this.diagnosticsService.findAll({
+      where: { user: { id: user.id } },
+      loadEagerRelations: true,
+    });
   }
 
   @Get(':id')
-  findOne(@Param() conditions: IdDto): Promise<DiagnosticEntity> {
-    return this.diagnosticsService.findOne(conditions);
+  findOne(
+    @User() user: Partial<UserEntity>,
+    @Param() conditions: IdDto,
+  ): Promise<DiagnosticEntity> {
+    return this.diagnosticsService.selectOneDetails({
+      ...conditions,
+      user: { id: user.id },
+    });
   }
 
   @Role(UserRoleEnum.ADMIN)
@@ -55,22 +61,5 @@ export class DiagnosticsController {
       diagnosticData,
       modelIds,
     );
-  }
-
-  @Role(UserRoleEnum.ADMIN)
-  @Patch(':id')
-  updateOne(
-    @Param() conditions: IdDto,
-    @Body() updateEntityDto: UpdateDiagnosticDto,
-  ): Promise<DiagnosticEntity> {
-    const model = plainToInstance(DiagnosticEntity, updateEntityDto);
-
-    return this.diagnosticsService.updateOne(conditions, model);
-  }
-
-  @Role(UserRoleEnum.ADMIN)
-  @Delete(':id')
-  deleteOne(@Param() conditions: IdDto): Promise<DiagnosticEntity> {
-    return this.diagnosticsService.deleteOne(conditions);
   }
 }
