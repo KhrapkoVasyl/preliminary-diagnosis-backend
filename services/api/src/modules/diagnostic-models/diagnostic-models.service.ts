@@ -67,22 +67,26 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
 
   async selectAvailableModels(
     options?: FindManyOptions<DiagnosticModelEntity>,
+    transactionManager?: EntityManager,
   ): Promise<DiagnosticModelEntity[]> {
-    const models = await this.findAll({
-      ...options,
-      where: {
-        status: DiagnosticModelStatus.ENABLED,
-        versions: {
-          status: DiagnosticModelVersionStatus.ENABLED,
+    const models = await this.findAll(
+      {
+        ...options,
+        where: {
+          status: DiagnosticModelStatus.ENABLED,
+          versions: {
+            status: DiagnosticModelVersionStatus.ENABLED,
+          },
+        },
+        relations: { versions: { file: true } },
+        order: {
+          versions: {
+            version: 'DESC',
+          },
         },
       },
-      relations: { versions: { file: true } },
-      order: {
-        versions: {
-          version: 'DESC',
-        },
-      },
-    });
+      transactionManager,
+    );
 
     const filteredModels = models.filter((model) => {
       if (model.versions && model.versions.length > 0) {
@@ -98,6 +102,7 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
   async selectAvailableModelVersion(
     conditions: FindOptionsWhere<DiagnosticModelEntity>,
     options?: FindOneOptions<DiagnosticModelEntity>,
+    transactionManager?: EntityManager,
   ): Promise<DiagnosticModelEntity> {
     const model = await this.findOneWithVersions(
       {
@@ -106,6 +111,7 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
         versions: { status: DiagnosticModelVersionStatus.ENABLED },
       },
       options,
+      transactionManager,
     );
 
     model.versions = [model.versions[0]];

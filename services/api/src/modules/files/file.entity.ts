@@ -2,24 +2,14 @@ import { ConfigService } from '@nestjs/config';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import * as path from 'path';
+import { CommonEntity } from 'src/common/entities';
 import { AppConfigService } from 'src/config/app-config.service';
-import {
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  BaseEntity,
-  Column,
-  Entity,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 const appConfigService = new AppConfigService(new ConfigService());
 
 @Entity('files')
-export class FileEntity extends BaseEntity {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  public readonly id: string;
-
+export class FileEntity extends CommonEntity {
   @ApiProperty({ type: 'string', maxLength: 256, required: true })
   @Column({ type: 'varchar', length: 256 })
   public readonly fileName: string;
@@ -50,16 +40,4 @@ export class FileEntity extends BaseEntity {
 
     return new URL(filePath).toString();
   }
-
-  @ApiProperty({ readOnly: true })
-  @CreateDateColumn({
-    readonly: true,
-  })
-  public readonly createdAt: Date;
-
-  @ApiProperty({ readOnly: true })
-  @UpdateDateColumn({
-    readonly: true,
-  })
-  public readonly updatedAt: Date;
 }

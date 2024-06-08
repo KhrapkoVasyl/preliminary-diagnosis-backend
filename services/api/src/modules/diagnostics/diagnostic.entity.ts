@@ -50,12 +50,11 @@ export class DiagnosticEntity extends CommonEntity {
     nullable: false,
     eager: true,
   })
-  file: Partial<FileEntity>;
+  image: Partial<FileEntity>;
 
-  @ApiProperty({
-    enum: DiagnosticStatus,
-  })
+  @ApiProperty({ enum: DiagnosticStatus })
   @VirtualColumn({
+    type: 'enum',
     query: getDiagnosticStatusQuery,
   })
   status: DiagnosticStatus;

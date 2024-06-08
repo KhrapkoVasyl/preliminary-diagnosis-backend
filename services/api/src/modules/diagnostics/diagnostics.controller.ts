@@ -14,11 +14,12 @@ import { DiagnosticsService } from './diagnostics.service';
 import { DiagnosticEntity } from './diagnostic.entity';
 import { IdDto } from 'src/common/dto';
 import { CreateDiagnosticDto, UpdateDiagnosticDto } from './dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { AccessTokenGuard } from '../auth/guards';
-import { Role } from '../auth/decorators';
+import { Role, User } from '../auth/decorators';
 import { UserRoleEnum } from '../users/enums';
+import { UserEntity } from '../users/user.entity';
 
 @ApiTags('diagnostics')
 @Controller('diagnostics')
@@ -40,12 +41,20 @@ export class DiagnosticsController {
 
   @Role(UserRoleEnum.ADMIN)
   @Post()
-  createOne(
-    @Body() createEntityDto: CreateDiagnosticDto,
+  @ApiBody({ type: CreateDiagnosticDto })
+  @ApiConsumes('multipart/form-data')
+  uploadModelVersion(
+    @User() user: Partial<UserEntity>,
+    @Body() data: CreateDiagnosticDto,
   ): Promise<DiagnosticEntity> {
-    const model = plainToInstance(DiagnosticEntity, createEntityDto);
+    const { file, modelIds, ...diagnosticData } = data;
 
-    return this.diagnosticsService.createOne(model);
+    return this.diagnosticsService.createDiagnostic(
+      user,
+      file,
+      diagnosticData,
+      modelIds,
+    );
   }
 
   @Role(UserRoleEnum.ADMIN)
