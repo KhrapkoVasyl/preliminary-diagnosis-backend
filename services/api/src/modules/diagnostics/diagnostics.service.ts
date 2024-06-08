@@ -1,15 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager, FindOptionsWhere } from 'typeorm';
 import { diagnosticsServiceErrorMessages } from './diagnostics.constants';
 import { DiagnosticEntity } from './diagnostic.entity';
+import { UserEntity } from '../users/user.entity';
+import { IMultipartFile } from 'src/systems/storage/interfaces';
+import { join } from 'path';
+import { DIAGNOSTIC_IMAGE_DIRECTORY } from 'src/systems/storage/storage.constants';
+import { randomUUID } from 'crypto';
+import { FilesService } from '../files/files.service';
+import { DiagnosticResultsService } from '../diagnostic-results/diagnostic-results.service';
+import { DiagnosticModelsService } from '../diagnostic-models/diagnostic-models.service';
+import { ErrorMessagesEnum } from 'src/common/enums';
 
 @Injectable()
 export class DiagnosticsService extends BaseService<DiagnosticEntity> {
   constructor(
     @InjectRepository(DiagnosticEntity)
     private readonly diagnosticEntityRepository: Repository<DiagnosticEntity>,
+    private readonly filesService: FilesService,
+    private readonly diagnosticResultsService: DiagnosticResultsService,
+    private readonly diagnosticModelsService: DiagnosticModelsService,
   ) {
     super(diagnosticEntityRepository, diagnosticsServiceErrorMessages);
   }
@@ -17,8 +29,61 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
   async selectOneDetails(
     conditions: FindOptionsWhere<DiagnosticEntity>,
     transactionManager?: EntityManager,
-  ): Promise<DiagnosticEntity> {
-    return this.findOne(conditions, {}, transactionManager);
+  ) {
+    const diagnostic = await this.findOne(
+      conditions,
+      {
+        loadEagerRelations: false,
+        relations: {
+          image: true,
+          results: { modelVersion: { model: { type: true } } },
+        },
+      },
+      transactionManager,
+    );
+
+    return this.transformDiagnosticToDetailsFormat(diagnostic);
+  }
+
+  private transformDiagnosticToDetailsFormat(
+    diagnostic: Partial<DiagnosticEntity>,
+  ) {
+    const { results, ...diagnosticData } = diagnostic;
+
+    const types = {};
+    for (const result of results) {
+      const { modelVersion, ...resultData } = result;
+      const { model, ...versionData } = modelVersion;
+      const { type, ...modelData } = model;
+
+      if (!types[type.id]) {
+        types[type.id] = {
+          ...type,
+          models: {},
+        };
+      }
+      const typeInCollection = types[type.id];
+
+      if (!typeInCollection.models[model.id]) {
+        types[type.id].models[model.id] = {
+          ...modelData,
+          versions: {},
+        };
+      }
+
+      const modelInCollection = typeInCollection.models[model.id];
+      if (!modelInCollection.versions[modelVersion.id]) {
+        types[type.id].models[model.id].versions[modelVersion.id] = {
+          ...versionData,
+          results: {},
+        };
+      }
+      const versionInCollection = modelInCollection.versions[modelVersion.id];
+
+      versionInCollection.results[result.id] = resultData;
+    }
+
+    return { ...diagnosticData, types };
   }
 
   async createDiagnostic(
@@ -26,7 +91,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
     file: IMultipartFile,
     entity: Partial<DiagnosticEntity>,
     modelIds: string[],
-  ): Promise<DiagnosticEntity> {
+  ) {
     return this.diagnosticEntityRepository.manager.transaction(
       async (transaction) => {
         const diagnosticId = randomUUID();
@@ -43,7 +108,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
           transaction,
         );
 
-        const createdDiagnostic = await this.createOne(
+        await this.createOne(
           {
             ...entity,
             name: actualName,
@@ -60,7 +125,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
           transaction,
         );
 
-        return createdDiagnostic;
+        return this.selectOneDetails({ id: diagnosticId }, transaction);
       },
     );
   }

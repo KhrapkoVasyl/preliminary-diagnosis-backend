@@ -35,10 +35,7 @@ export class DiagnosticsController {
   }
 
   @Get(':id')
-  findOne(
-    @User() user: Partial<UserEntity>,
-    @Param() conditions: IdDto,
-  ): Promise<DiagnosticEntity> {
+  findOne(@User() user: Partial<UserEntity>, @Param() conditions: IdDto) {
     return this.diagnosticsService.selectOneDetails({
       ...conditions,
       user: { id: user.id },
@@ -52,7 +49,7 @@ export class DiagnosticsController {
   uploadModelVersion(
     @User() user: Partial<UserEntity>,
     @Body() data: CreateDiagnosticDto,
-  ): Promise<DiagnosticEntity> {
+  ) {
     const { file, modelIds, ...diagnosticData } = data;
 
     return this.diagnosticsService.createDiagnostic(
