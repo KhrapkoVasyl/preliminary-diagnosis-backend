@@ -1,9 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+  VirtualColumn,
+} from 'typeorm';
 import { CommonEntity } from 'src/common/entities';
 import { UserEntity } from '../users/user.entity';
 import { FileEntity } from '../files/file.entity';
 import { DiagnosticStatus } from './enums';
+import { DiagnosticResultEntity } from '../diagnostic-results/diagnostic-result.entity';
+import { getDiagnosticStatusQuery } from './diagnostics.helper';
 
 @Entity({ name: 'diagnostics' })
 export class DiagnosticEntity extends CommonEntity {
@@ -43,14 +53,16 @@ export class DiagnosticEntity extends CommonEntity {
   file: Partial<FileEntity>;
 
   @ApiProperty({
-    // TODO: change to virtual fields
     enum: DiagnosticStatus,
-    default: DiagnosticStatus.PENDING,
   })
-  @Column({
-    type: 'enum',
-    enum: DiagnosticStatus,
-    default: DiagnosticStatus.PENDING,
+  @VirtualColumn({
+    query: getDiagnosticStatusQuery,
   })
-  readonly status: DiagnosticStatus;
+  status: DiagnosticStatus;
+
+  @ApiHideProperty()
+  @OneToMany(() => DiagnosticResultEntity, ({ diagnostic }) => diagnostic, {
+    nullable: true,
+  })
+  results: DiagnosticResultEntity[];
 }
