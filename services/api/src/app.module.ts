@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DiagnosticTypesModule } from './modules/diagnostic-types';
 import { DiagnosticModelsModule } from './modules/diagnostic-models';
 import { DiagnosticModelVersionsModule } from './modules/diagnostic-model-versions';
+import { DiagnosticsModule } from './modules/diagnostics';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DiagnosticModelVersionsModule } from './modules/diagnostic-model-versio
     DiagnosticTypesModule,
     DiagnosticModelsModule,
     DiagnosticModelVersionsModule,
+    DiagnosticsModule,
     FilesModule,
   ],
 })
