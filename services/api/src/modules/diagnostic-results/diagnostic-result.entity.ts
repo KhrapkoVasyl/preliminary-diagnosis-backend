@@ -49,7 +49,7 @@ export class DiagnosticResultEntity extends CommonEntity {
   @Transform(({ value }) => parseFloat(value))
   @ApiProperty({ type: Number, required: false, example: 23, nullable: true })
   @Column({ type: 'numeric', scale: 2, precision: 5, nullable: true })
-  deseasProbability: number;
+  diseaseProbability: number;
 
   @ApiProperty({
     type: 'string',
