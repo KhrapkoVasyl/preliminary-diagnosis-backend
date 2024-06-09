@@ -20,6 +20,16 @@ export class DiagnosticModelEntity extends CommonEntity {
   @Column({ length: 500, nullable: true })
   description: string;
 
+  @ApiProperty({
+    type: 'MELANOMA_CUSTOM_MODEL_QUEUE',
+    maxLength: 128,
+    required: true,
+    nullable: false,
+    uniqueItems: true,
+  })
+  @Column({ length: 128, nullable: false, unique: true })
+  queueName: string;
+
   @JoinColumn()
   @ApiProperty({
     type: () => DiagnosticTypeEntity,

@@ -14,7 +14,7 @@ export class CreateGenreDto {
   @IsString()
   @MaxLength(128)
   @ApiProperty({
-    example: 'Pytorch Custom model for Melanoma',
+    example: 'Tensorflow Custom model for Melanoma',
     required: true,
     nullable: false,
     maxLength: 128,
@@ -31,6 +31,17 @@ export class CreateGenreDto {
     maxLength: 500,
   })
   public readonly description: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(128)
+  @ApiProperty({
+    example: 'MELANOMA_CUSTOM_MODEL_QUEUE',
+    required: true,
+    nullable: false,
+    maxLength: 128,
+  })
+  public readonly queueName: string;
 
   @IsNotEmpty()
   @IsObject()
