@@ -12,10 +12,10 @@ export class RabbitMQConnectionService {
   private readonly rabbitMQHost =
     this.configService.get<string>('RABBIT_MQ_HOST');
   private readonly rabbitMQUser = this.configService.get<string>(
-    'RABBITMQ_DEFAULT_USER',
+    'RABBIT_MQ_DEFAULT_USER',
   );
   private readonly rabbitMQPassword = this.configService.get<string>(
-    'RABBITMQ_DEFAULT_PASS',
+    'RABBIT_MQ_DEFAULT_PASS',
   );
   private connection: amqp.Connection;
   private channel: amqp.Channel;
