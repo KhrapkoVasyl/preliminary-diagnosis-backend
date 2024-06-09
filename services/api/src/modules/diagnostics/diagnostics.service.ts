@@ -131,6 +131,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
         await this.uploadDiagnosticByModels(
           diagnosticId,
           modelIds,
+          image.pathInStorage,
           transaction,
         );
 
@@ -142,6 +143,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
   async uploadDiagnosticByModels(
     diagnosticId: string,
     modelIds: string[],
+    imagePathInStorage: string,
     transactionManager?: EntityManager,
   ): Promise<void> {
     const uniqueModelIds = new Set(modelIds); // remove duplicate values
@@ -157,13 +159,20 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
       if (!availableVersion) {
         continue;
       }
-      await this.diagnosticResultsService.createOne(
+
+      const result = await this.diagnosticResultsService.createOne(
         {
           diagnostic: { id: diagnosticId },
           modelVersion: { id: availableVersion.id },
         },
         transactionManager,
       );
+
+      await this.rabbitMQPublisherService.addMessageToQueue(model.queueName, {
+        resultId: result.id,
+        imagePathInStorage,
+      });
+
       uploadedModels++;
     }
 
