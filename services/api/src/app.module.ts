@@ -9,6 +9,7 @@ import { DiagnosticModelsModule } from './modules/diagnostic-models';
 import { DiagnosticModelVersionsModule } from './modules/diagnostic-model-versions';
 import { DiagnosticsModule } from './modules/diagnostics';
 import { DiagnosticResultsModule } from './modules/diagnostic-results';
+import { MessageQueueModule } from './systems/message-queue';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DiagnosticResultsModule } from './modules/diagnostic-results';
     DiagnosticsModule,
     DiagnosticResultsModule,
     FilesModule,
+    MessageQueueModule,
   ],
 })
 export class AppModule {}
