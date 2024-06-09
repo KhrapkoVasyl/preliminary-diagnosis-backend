@@ -26,6 +26,10 @@ export class RabbitMQConnectionService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    await this.setUpConnection();
+  }
+
+  async setUpConnection() {
     this.connection = await amqp.connect(
       `${this.rabbitMQProtocol}://${this.rabbitMQUser}:${this.rabbitMQPassword}@${this.rabbitMQHost}`,
     );
