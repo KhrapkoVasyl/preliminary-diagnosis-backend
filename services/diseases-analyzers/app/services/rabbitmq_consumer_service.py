@@ -1,14 +1,16 @@
 import json
 import os
+import logging
 from app.services.rabbitmq_connection_service import RabbitMQConnectionService
 from app.services.rabbitmq_publisher_service import RabbitMQPublisherService
-import logging
+from app.services.storage_service import StorageService
 
 class RabbitMQConsumerService:
-    def __init__(self, rabbitmq_connection_service: RabbitMQConnectionService, rabbitmq_publisher_service: RabbitMQPublisherService):
+    def __init__(self, rabbitmq_connection_service: RabbitMQConnectionService, rabbitmq_publisher_service: RabbitMQPublisherService, storage_service: StorageService):
         self.logger = logging.getLogger(__name__)
         self.rabbitmq_connection_service = rabbitmq_connection_service
         self.rabbitmq_publisher_service = rabbitmq_publisher_service
+        self.storage_service = storage_service
         self.queue_name = os.getenv('RABBIT_MQ_QUEUE_NAME')
         self.result_queue_name = os.getenv('RABBIT_MQ_RESULT_QUEUE_NAME')
         self.rabbitmq_connection_service.set_up_connection()
@@ -42,10 +44,12 @@ class RabbitMQConsumerService:
     def handle_diagnostic_result(self, data):
         result_id = data.get('resultId')
         image_path_in_storage = data.get('imagePathInStorage')
-    
         if not result_id or not image_path_in_storage:
             raise ValueError("Missing required data in message")
-    
+        buffer = self.storage_service.read_file_to_buffer(image_path_in_storage)
+        if not buffer:
+            raise ValueError(f"File by specified path (${image_path_in_storage}) not found!")
+        # photo diagnostic using ai model to recieve probability
         result_data = {
             'resultId': result_id,
             'status': 'COMPLETED',
