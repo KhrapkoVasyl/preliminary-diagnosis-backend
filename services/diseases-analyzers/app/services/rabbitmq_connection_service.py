@@ -28,6 +28,7 @@ class RabbitMQConnectionService:
             )
         )
         self.channel = self.connection.channel()
+        self.channel.basic_qos(prefetch_count=1)
 
     def assert_queue(self, queue: str):
         self.logger.debug(f"Asserting queue - {queue}")
