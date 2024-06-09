@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import * as amqp from 'amqplib';
 import { AppConfigService } from 'src/config/app-config.service';
-import { DiagnosticModelsService } from 'src/modules/diagnostic-models/diagnostic-models.service';
+import { DiagnosticsService } from 'src/modules/diagnostics/diagnostics.service';
 
 @Injectable()
-export class RabbitMQConnectionService implements OnModuleInit {
+export class RabbitMQConnectionService {
   private readonly logger = new Logger(RabbitMQConnectionService.name);
 
   private readonly rabbitMQProtocol =
@@ -22,12 +22,9 @@ export class RabbitMQConnectionService implements OnModuleInit {
 
   constructor(
     private readonly configService: AppConfigService,
-    private readonly diagnosticModelsService: DiagnosticModelsService,
+    @Inject(forwardRef(() => DiagnosticsService))
+    private readonly diagnosticsService: DiagnosticsService,
   ) {}
-
-  async onModuleInit() {
-    await this.setUpConnection();
-  }
 
   async setUpConnection() {
     this.connection = await amqp.connect(
@@ -44,7 +41,7 @@ export class RabbitMQConnectionService implements OnModuleInit {
 
   async assertQueueForModels() {
     const modelQueueNames =
-      await this.diagnosticModelsService.selectModelQueueNames();
+      await this.diagnosticsService.selectModelQueueNames();
 
     for (const modelQueueName of modelQueueNames) {
       await this.assertQueue(modelQueueName);

@@ -99,18 +99,6 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
     return filteredModels;
   }
 
-  async selectModelQueueNames(
-    options?: FindManyOptions<DiagnosticModelEntity>,
-    transactionManager?: EntityManager,
-  ): Promise<string[]> {
-    const models = await this.selectAvailableModels(
-      options,
-      transactionManager,
-    );
-
-    return models.map(({ queueName }) => queueName);
-  }
-
   async selectAvailableModelVersion(
     conditions: FindOptionsWhere<DiagnosticModelEntity>,
     options?: FindOneOptions<DiagnosticModelEntity>,

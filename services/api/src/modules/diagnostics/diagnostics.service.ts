@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services';
-import { Repository, EntityManager, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  EntityManager,
+  FindOptionsWhere,
+  FindManyOptions,
+} from 'typeorm';
 import { diagnosticsServiceErrorMessages } from './diagnostics.constants';
 import { DiagnosticEntity } from './diagnostic.entity';
 import { UserEntity } from '../users/user.entity';
@@ -13,6 +18,9 @@ import { FilesService } from '../files/files.service';
 import { DiagnosticResultsService } from '../diagnostic-results/diagnostic-results.service';
 import { DiagnosticModelsService } from '../diagnostic-models/diagnostic-models.service';
 import { ErrorMessagesEnum } from 'src/common/enums';
+import { DiagnosticModelEntity } from '../diagnostic-models/diagnostic-model.entity';
+import { RabbitMQPublisherService } from 'src/systems/message-queue/rabbit-mq-publisher.service';
+import { DiagnosticResultData } from './types';
 
 @Injectable()
 export class DiagnosticsService extends BaseService<DiagnosticEntity> {
@@ -22,6 +30,7 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
     private readonly filesService: FilesService,
     private readonly diagnosticResultsService: DiagnosticResultsService,
     private readonly diagnosticModelsService: DiagnosticModelsService,
+    private readonly rabbitMQPublisherService: RabbitMQPublisherService,
   ) {
     super(diagnosticEntityRepository, diagnosticsServiceErrorMessages);
   }
@@ -179,5 +188,22 @@ export class DiagnosticsService extends BaseService<DiagnosticEntity> {
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
     return `diagnostic_${year}${month}${day}_${hours}${minutes}${seconds}`;
+  }
+
+  async selectModelQueueNames(
+    options?: FindManyOptions<DiagnosticModelEntity>,
+    transactionManager?: EntityManager,
+  ): Promise<string[]> {
+    const models = await this.diagnosticModelsService.selectAvailableModels(
+      options,
+      transactionManager,
+    );
+
+    return models.map(({ queueName }) => queueName);
+  }
+
+  async handleDiagnosticResult(data: DiagnosticResultData): Promise<void> {
+    const { resultId, ...resultData } = data;
+    await this.diagnosticResultsService.updateOne({ id: resultId }, resultData);
   }
 }

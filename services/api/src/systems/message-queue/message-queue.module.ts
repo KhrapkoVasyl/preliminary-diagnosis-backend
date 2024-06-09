@@ -1,17 +1,17 @@
-import { Module } from '@nestjs/common';
-import { RabbitMQService } from './rabbit-mq.service';
+import { Module, forwardRef } from '@nestjs/common';
+import { RabbitMQPublisherService } from './rabbit-mq-publisher.service';
 import { AppConfigModule } from 'src/config';
 import { RabbitMQConsumerService } from './rabbit-mq-consumer.service';
-import { DiagnosticModelsModule } from 'src/modules/diagnostic-models';
 import { RabbitMQConnectionService } from './rabbit-mq-connection.service';
+import { DiagnosticsModule } from 'src/modules/diagnostics';
 
 @Module({
-  imports: [AppConfigModule, DiagnosticModelsModule],
+  imports: [AppConfigModule, forwardRef(() => DiagnosticsModule)],
   providers: [
     RabbitMQConnectionService,
-    RabbitMQService,
+    RabbitMQPublisherService,
     RabbitMQConsumerService,
   ],
-  exports: [RabbitMQService],
+  exports: [RabbitMQPublisherService],
 })
 export class MessageQueueModule {}
