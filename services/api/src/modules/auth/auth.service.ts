@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SingInDto } from './dto';
 import { RefreshTokenEntity } from '../refresh-tokens/refresh-token.entity';
 import { ErrorMessagesEnum } from 'src/common/enums';
-import { generateRandomString } from 'src/helpers';
+import { generateRandomString } from 'src/common/helpers';
 import { UserRoleEnum } from '../users/enums';
 
 @Injectable()
