@@ -12,10 +12,12 @@ const data: Partial<UserEntity>[] = [
   },
 ];
 
-export class Users1717495004423 implements MigrationInterface {
+export class Users1718117253180 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.connection.synchronize(); // TODO: delete after init migration
-    await queryRunner.connection.getRepository(UserEntity).save(data);
+    await queryRunner.connection.synchronize();
+    await queryRunner.connection
+      .getRepository(UserEntity)
+      .save(data, { reload: false });
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

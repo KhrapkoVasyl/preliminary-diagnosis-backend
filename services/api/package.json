@@ -23,6 +23,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm:cli": "ts-node ./node_modules/typeorm/cli",
+    "typeorm:generate:migration": "cross-env NODE_ENV=development node -r tsconfig-paths/register -r ts-node/register ./node_modules/typeorm/cli.js -d ./typeOrm.config.ts migration:generate ./src/database/migrations/init",
     "typeorm:migrations": "npm run typeorm:cli -- migration:create src/systems/database/migrations/users",
     "prepare": "cd ../../ && husky services/api/.husky"
   },
