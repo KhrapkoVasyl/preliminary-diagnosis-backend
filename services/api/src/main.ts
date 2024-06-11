@@ -29,6 +29,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix(GLOBAL_PREFIX);
 
+  app.enableCors();
+
   const ENABLE_SWAGGER = configService.get<boolean>('ENABLE_SWAGGER');
   if (ENABLE_SWAGGER) {
     const swaggerConfig = new DocumentBuilder()
