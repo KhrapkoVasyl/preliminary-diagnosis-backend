@@ -43,7 +43,7 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
       {
         ...options,
         loadEagerRelations: false,
-        relations: { versions: { file: true } },
+        relations: { versions: { file: true }, type: true },
         order: { versions: { version: 'DESC' } },
       },
       transactionManager,
@@ -58,7 +58,7 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
       {
         ...options,
         loadEagerRelations: false,
-        relations: { versions: { file: true } },
+        relations: { versions: { file: true }, type: true },
         order: { versions: { version: 'DESC' } },
       },
       transactionManager,
@@ -78,7 +78,7 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
             status: DiagnosticModelVersionStatus.ENABLED,
           },
         },
-        relations: { versions: { file: true } },
+        relations: { versions: { file: true }, type: true },
         order: {
           versions: {
             version: 'DESC',
