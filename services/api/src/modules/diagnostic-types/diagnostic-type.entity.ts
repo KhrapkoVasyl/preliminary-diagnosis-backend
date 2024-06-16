@@ -16,10 +16,4 @@ export class DiagnosticTypeEntity extends CommonEntity {
   })
   @Column({ length: 500, nullable: true })
   description: string;
-
-  // @ApiHideProperty()
-  // @OneToMany(() => DiagnosticEntity, ({ type }) => type, {
-  //   nullable: true,
-  // })
-  // studies: DiagnosticEntity[];
 }
