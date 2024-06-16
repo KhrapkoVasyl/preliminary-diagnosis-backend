@@ -14,8 +14,7 @@ import { IdDto } from 'src/common/dto';
 import { CreateDiagnosticDto } from './dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/guards';
-import { Role, User } from '../auth/decorators';
-import { UserRoleEnum } from '../users/enums';
+import { User } from '../auth/decorators';
 import { UserEntity } from '../users/user.entity';
 
 @ApiTags('diagnostics')
@@ -42,7 +41,6 @@ export class DiagnosticsController {
     });
   }
 
-  @Role(UserRoleEnum.ADMIN)
   @Post()
   @ApiBody({ type: CreateDiagnosticDto })
   @ApiConsumes('multipart/form-data')
