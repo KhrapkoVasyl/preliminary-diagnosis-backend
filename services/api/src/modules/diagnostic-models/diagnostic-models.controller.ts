@@ -13,7 +13,11 @@ import {
 import { DiagnosticModelsService } from './diagnostic-models.service';
 import { DiagnosticModelEntity } from './diagnostic-model.entity';
 import { IdDto } from 'src/common/dto';
-import { CreateGenreDto, UpdateGenreDto, UploadModelVersionDto } from './dto';
+import {
+  CreateDiagnosticModelDto,
+  UpdateDiagnosticModelDto,
+  UploadModelVersionDto,
+} from './dto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -68,7 +72,7 @@ export class DiagnosticModelsController {
   @Role(UserRoleEnum.ADMIN)
   @Post()
   createOne(
-    @Body() createEntityDto: CreateGenreDto,
+    @Body() createEntityDto: CreateDiagnosticModelDto,
   ): Promise<DiagnosticModelEntity> {
     const model = plainToInstance(DiagnosticModelEntity, createEntityDto);
 
@@ -79,7 +83,7 @@ export class DiagnosticModelsController {
   @Patch(':id')
   updateOne(
     @Param() conditions: IdDto,
-    @Body() updateEntityDto: UpdateGenreDto,
+    @Body() updateEntityDto: UpdateDiagnosticModelDto,
   ): Promise<DiagnosticModelEntity> {
     const model = plainToInstance(DiagnosticModelEntity, updateEntityDto);
 

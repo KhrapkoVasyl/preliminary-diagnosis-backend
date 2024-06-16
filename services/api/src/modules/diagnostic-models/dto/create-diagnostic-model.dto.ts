@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { IdDto } from 'src/common/dto';
 
-export class CreateGenreDto {
+export class CreateDiagnosticModelDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(128)
