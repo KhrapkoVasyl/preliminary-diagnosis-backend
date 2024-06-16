@@ -58,6 +58,7 @@ export class DiagnosticModelsController {
     return this.diagnosticModelsService.selectAvailableModelVersion(conditions);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Role(UserRoleEnum.ADMIN)
   @Get(':id')
   findOne(@Param() conditions: IdDto): Promise<DiagnosticModelEntity> {
