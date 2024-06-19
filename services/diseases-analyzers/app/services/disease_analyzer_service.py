@@ -1,6 +1,7 @@
 import tensorflow as tf
 import io
 import os
+from random import randint
 import logging
 from app.services.storage_service import StorageService
 from dotenv import load_dotenv
@@ -34,7 +35,7 @@ class DiseaseAnalyzerService:
             image = tf.io.decode_image(image_buffer.getvalue(), channels=3)
             image = tf.image.resize(image, [224, 224])
             image = tf.expand_dims(image, axis=0)
-            disease_probability = 3
+            disease_probability = randint(0, 20)
             self.logger.debug(f"Disease probability: {disease_probability}")
             return disease_probability
         except Exception as e:
