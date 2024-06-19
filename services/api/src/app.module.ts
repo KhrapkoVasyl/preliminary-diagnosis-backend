@@ -10,6 +10,7 @@ import { DiagnosticModelVersionsModule } from './modules/diagnostic-model-versio
 import { DiagnosticsModule } from './modules/diagnostics';
 import { DiagnosticResultsModule } from './modules/diagnostic-results';
 import { MessageQueueModule } from './systems/message-queue';
+import { DockerModule } from './systems/docker';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MessageQueueModule } from './systems/message-queue';
     DiagnosticResultsModule,
     FilesModule,
     MessageQueueModule,
+    DockerModule,
   ],
 })
 export class AppModule {}

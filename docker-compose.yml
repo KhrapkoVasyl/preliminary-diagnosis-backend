@@ -14,6 +14,8 @@ services:
       - network
     environment:
       - NODE_ENV=production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   diseases-analyzers-service:
     build:
@@ -72,7 +74,7 @@ services:
     ports:
       - '5672:5672'
       - '15672:15672' # port for monitoring (web interface)
-      - '15692:15692' #prometheus
+      - '15692:15692' # prometheus
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
