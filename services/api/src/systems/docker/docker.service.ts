@@ -10,6 +10,7 @@ export class DockerService {
   private docker: Docker;
   private network: string;
   private diseaseAnalyzerServiceImageName: string;
+  private prefix: string;
 
   constructor(private readonly configService: AppConfigService) {
     const socketPath = this.configService.get('DOCKER_SOCKET_PATH');
@@ -18,6 +19,60 @@ export class DockerService {
     this.diseaseAnalyzerServiceImageName = this.configService.get(
       'DOCKER_DISEASES_ANALYZER_SERVICE_IMAGE',
     );
+    this.prefix = this.configService.get(
+      'DOCKER_SDOCKER_DISEASES_ANALYZER_SERVICE_NAME_PREFIX',
+    );
+  }
+
+  async listContainers(onlyActive: boolean = true) {
+    try {
+      const containers = await this.docker.listContainers({ all: !onlyActive });
+
+      return containers;
+    } catch (error) {
+      this.logger.error('Failed to list containers', error);
+      throw error;
+    }
+  }
+
+  async findActiveContainerByEnv(envVar: string, value: string) {
+    try {
+      const containers = await this.docker.listContainers({ all: false });
+      for (const containerInfo of containers) {
+        const container = this.docker.getContainer(containerInfo.Id);
+        const details = await container.inspect();
+        const envs = details.Config.Env;
+        const envValue = envs.find((env: string) =>
+          env.startsWith(`${envVar}=`),
+        );
+        if (envValue && envValue.split('=')[1] === value) {
+          return details;
+        }
+      }
+      return null;
+    } catch (error) {
+      this.logger.error('Failed to find container by env', error);
+      throw error;
+    }
+  }
+
+  async startOneDiseaseAnalyzerContainer(
+    containerPrefix: string,
+    pathToModel: string,
+    queueName: string,
+  ) {
+    const existingContainer = await this.findActiveContainerByEnv(
+      'RABBIT_MQ_QUEUE_NAME',
+      queueName,
+    );
+
+    if (!existingContainer) {
+      await this.startDiseaseAnalyzerContainer(
+        containerPrefix,
+        pathToModel,
+        queueName,
+      );
+    }
   }
 
   async startDiseaseAnalyzerContainer(
@@ -25,8 +80,7 @@ export class DockerService {
     pathToModel: string,
     queueName: string,
   ) {
-    const name = containerPrefix + generateRandomString(6);
-    console.log('\n\nName: ', name, '\n\n');
+    const name = `${this.prefix}-${containerPrefix}-` + generateRandomString(6);
 
     return this.createAndStartContainer(
       this.diseaseAnalyzerServiceImageName,
@@ -61,9 +115,9 @@ export class DockerService {
       });
 
       await container.start();
-      console.log(`Container ${containerName} started successfully`);
+      this.logger.debug(`Container ${containerName} started successfully`);
     } catch (error) {
-      console.error(`Failed to start container ${containerName}`, error);
+      this.logger.error(`Failed to start container ${containerName}`, error);
     }
   }
 }
