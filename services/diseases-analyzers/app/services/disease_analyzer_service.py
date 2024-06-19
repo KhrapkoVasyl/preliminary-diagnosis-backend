@@ -5,8 +5,9 @@ import logging
 from app.services.storage_service import StorageService
 from dotenv import load_dotenv
 import tempfile
+from app.config import ENV_FILE
 
-load_dotenv()
+load_dotenv(ENV_FILE)
 
 class DiseaseAnalyzerService:
     def __init__(self, storage_service: StorageService):

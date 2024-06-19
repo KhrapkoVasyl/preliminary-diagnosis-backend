@@ -2,8 +2,9 @@ import os
 import pika
 from dotenv import load_dotenv
 import logging
+from app.config import ENV_FILE
 
-load_dotenv()
+load_dotenv(ENV_FILE)
 
 class RabbitMQConnectionService:
     def __init__(self):
