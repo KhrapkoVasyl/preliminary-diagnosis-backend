@@ -132,6 +132,10 @@ export class DockerService {
     }
   }
 
+  async stopAllDiseaseAnalyzerContainersForQueue(queueName: string) {
+    await this.stopAllContainersByEnv('RABBIT_MQ_QUEUE_NAME', queueName);
+  }
+
   async stopAllContainersByEnv(envVar: string, value: string) {
     try {
       let containerDetails;
@@ -148,12 +152,12 @@ export class DockerService {
       this.logger.debug(
         `All containers with ${envVar}=${value} stopped successfully`,
       );
+      throw new Error('CUSTOM ERROR');
     } catch (error) {
       this.logger.error(
         `Failed to stop containers with ${envVar}=${value}`,
         error,
       );
-      throw error;
     }
   }
 }

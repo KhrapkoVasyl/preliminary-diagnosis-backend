@@ -130,11 +130,11 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
   ): Promise<DiagnosticModelEntity> {
     return this.diagnosticModelEntityRepository.manager.transaction(
       async (transaction) => {
-        const { id, versions = [] } = await this.findOneWithVersions(
-          conditions,
-          undefined,
-          transaction,
-        );
+        const {
+          id,
+          queueName,
+          versions = [],
+        } = await this.findOneWithVersions(conditions, undefined, transaction);
 
         const filePath = this.getPathToModelVersionFile(id);
         const newVersionFile = await this.filesService.createOne(
@@ -155,6 +155,8 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
           },
           transaction,
         );
+
+        this.dockerService.stopAllDiseaseAnalyzerContainersForQueue(queueName);
 
         return this.findOneWithVersions({ id }, undefined, transaction);
       },
