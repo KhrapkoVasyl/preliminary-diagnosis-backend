@@ -120,4 +120,40 @@ export class DockerService {
       this.logger.error(`Failed to start container ${containerName}`, error);
     }
   }
+
+  async stopContainerById(containerId: string) {
+    try {
+      const container = this.docker.getContainer(containerId);
+      await container.stop();
+      this.logger.debug(`Container ${containerId} stopped successfully`);
+    } catch (error) {
+      this.logger.error(`Failed to stop container ${containerId}`, error);
+      throw error;
+    }
+  }
+
+  async stopAllContainersByEnv(envVar: string, value: string) {
+    try {
+      let containerDetails;
+      while (
+        (containerDetails = await this.findActiveContainerByEnv(envVar, value))
+      ) {
+        const container = this.docker.getContainer(containerDetails.Id);
+        await container.stop();
+        this.logger.debug(
+          `Container ${containerDetails.Id} stopped successfully`,
+        );
+      }
+
+      this.logger.debug(
+        `All containers with ${envVar}=${value} stopped successfully`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to stop containers with ${envVar}=${value}`,
+        error,
+      );
+      throw error;
+    }
+  }
 }
