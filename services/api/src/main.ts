@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import multipart from '@fastify/multipart';
 import { validationPipe } from './common/pipes';
 import { AppConfigService } from './config/app-config.service';
+import { StorageProxyMiddleware } from './systems/storage/storage-proxy.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -29,6 +30,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix(GLOBAL_PREFIX);
 
+  const storageProxyMiddleware = new StorageProxyMiddleware(configService);
+  app.use(
+    configService.get('STATIC_FILES_PREFIX'),
+    storageProxyMiddleware.use.bind(storageProxyMiddleware),
+  );
   app.enableCors();
 
   const ENABLE_SWAGGER = configService.get<boolean>('ENABLE_SWAGGER');
@@ -47,8 +53,8 @@ async function bootstrap() {
   app.useGlobalPipes(validationPipe);
 
   await app.listen(PORT, HOST, () => {
-    console.log(`Server listens on http://${HOST}:${PORT}`);
+    console.log(`Nest.js server started`);
   });
 }
 
-bootstrap();
+setTimeout(() => bootstrap(), 10000);

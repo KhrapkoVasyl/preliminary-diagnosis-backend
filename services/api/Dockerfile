@@ -22,7 +22,7 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 WORKDIR /app
 
-COPY --from=build /app/*.env /app/package*.json ./
+COPY --from=build /app/*.env* /app/package*.json ./
 
 RUN npm ci --production
 

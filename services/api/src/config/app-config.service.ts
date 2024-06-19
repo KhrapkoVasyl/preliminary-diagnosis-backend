@@ -10,7 +10,8 @@ export class AppConfigService {
 
   get<T>(key: string): T {
     const value = this.configService.get<T>(key);
-    if (!value) throw new Error(key + ' env variable not set');
+    if (!value && !key.includes('npm'))
+      throw new Error(key + ' env variable not set');
 
     try {
       return JSON.parse(value as string);
