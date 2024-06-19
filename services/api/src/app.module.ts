@@ -11,11 +11,13 @@ import { DiagnosticsModule } from './modules/diagnostics';
 import { DiagnosticResultsModule } from './modules/diagnostic-results';
 import { MessageQueueModule } from './systems/message-queue';
 import { DockerModule } from './systems/docker';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     AppConfigModule,
     DatabaseModule,
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     DiagnosticTypesModule,

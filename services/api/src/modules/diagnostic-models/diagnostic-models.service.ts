@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services';
 import {
@@ -18,14 +18,19 @@ import { MODELS_DIRECTORY } from 'src/systems/storage/storage.constants';
 import { DiagnosticModelVersionsService } from '../diagnostic-model-versions/diagnostic-model-versions.service';
 import { DiagnosticModelStatus } from './enums';
 import { DiagnosticModelVersionStatus } from '../diagnostic-model-versions/enums';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { DockerService } from 'src/systems/docker/docker.service';
 
 @Injectable()
 export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> {
+  private readonly logger = new Logger(DiagnosticModelsService.name);
+
   constructor(
     @InjectRepository(DiagnosticModelEntity)
     private readonly diagnosticModelEntityRepository: Repository<DiagnosticModelEntity>,
     private readonly filesService: FilesService,
     private readonly diagnosticModelVersionsService: DiagnosticModelVersionsService,
+    private readonly dockerService: DockerService,
   ) {
     super(
       diagnosticModelEntityRepository,
@@ -168,5 +173,27 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
 
   getPathToModelVersionFile(modelId: string): string {
     return join(MODELS_DIRECTORY, modelId);
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async setUpAvailableDiagnosticModels() {
+    this.logger.debug('Running cron job to set up available diagnostic models');
+
+    const models = await this.selectAvailableModels();
+    for (const model of models) {
+      const lastModelVersion = model.versions[0];
+      const queueName = model.queueName;
+      const containerPrefix = `${queueName}_V${lastModelVersion.version}`;
+      const modelPath = lastModelVersion?.file?.pathInStorage;
+      await this.dockerService.startOneDiseaseAnalyzerContainer(
+        containerPrefix,
+        modelPath,
+        queueName,
+      );
+    }
+
+    this.logger.debug(
+      'Successfully finishing cron job to set up available diagnostic models',
+    );
   }
 }
