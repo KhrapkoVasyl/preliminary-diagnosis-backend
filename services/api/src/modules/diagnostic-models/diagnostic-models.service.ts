@@ -167,9 +167,40 @@ export class DiagnosticModelsService extends BaseService<DiagnosticModelEntity> 
     conditions: FindOptionsWhere<DiagnosticModelVersionEntity>,
     versionData: Partial<DiagnosticModelVersionEntity>,
   ): Promise<DiagnosticModelVersionEntity> {
-    return this.diagnosticModelVersionsService.updateOne(
-      conditions,
-      versionData,
+    return this.diagnosticModelEntityRepository.manager.transaction(
+      async (transaction) => {
+        const { model } = await this.diagnosticModelVersionsService.findOne(
+          conditions,
+          { relations: { model: true } },
+          transaction,
+        );
+
+        const { versions, queueName } = await this.selectAvailableModelVersion(
+          { id: model.id },
+          undefined,
+          transaction,
+        );
+
+        const currentVersion = versions[0];
+
+        const updatedVersion =
+          await this.diagnosticModelVersionsService.updateOne(
+            conditions,
+            versionData,
+            transaction,
+          );
+
+        if (
+          currentVersion.id === updatedVersion.id &&
+          updatedVersion.status === DiagnosticModelVersionStatus.DISABLED
+        ) {
+          this.dockerService.stopAllDiseaseAnalyzerContainersForQueue(
+            queueName,
+          );
+        }
+
+        return updatedVersion;
+      },
     );
   }
 
