@@ -1,5 +1,6 @@
 import tensorflow as tf
 import io
+import time
 import os
 from random import randint
 import logging
@@ -35,6 +36,7 @@ class DiseaseAnalyzerService:
             image = tf.io.decode_image(image_buffer.getvalue(), channels=3)
             image = tf.image.resize(image, [224, 224])
             image = tf.expand_dims(image, axis=0)
+            time.sleep(randint(18, 32))
             disease_probability = randint(0, 20)
             self.logger.debug(f"Disease probability: {disease_probability}")
             return disease_probability
