@@ -1,0 +1,6 @@
+fastapi==0.65.2
+uvicorn==0.14.0
+pika==1.2.0
+python-dotenv==0.19.1
+minio==7.1.0
+tensorflow==2.15.0

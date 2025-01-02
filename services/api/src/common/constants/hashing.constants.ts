@@ -1,0 +1,2 @@
+export const PASSWORD_SALT_ROUNDS = 10;
+export const REFRESH_TOKEN_SALT_ROUNDS = 10;
