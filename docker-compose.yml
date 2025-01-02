@@ -17,19 +17,19 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  diseases-analyzers-service:
-    build:
-      context: ./services/diseases-analyzers
-      dockerfile: Dockerfile
-    container_name: diseases-analyzer-1-service
-    depends_on:
-      - postgres
-      - minio
-      - rabbitmq
-    networks:
-      - network
-    environment:
-      - APP_MODE=production
+  # diseases-analyzers-service:
+  #   build:
+  #     context: ./services/diseases-analyzers
+  #     dockerfile: Dockerfile
+  #   container_name: diseases-analyzer-1-service
+  #   depends_on:
+  #     - postgres
+  #     - minio
+  #     - rabbitmq
+  #   networks:
+  #     - network
+  #   environment:
+  #     - APP_MODE=production
 
   postgres:
     image: postgres:14.1-alpine
